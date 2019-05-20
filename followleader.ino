@@ -2,6 +2,8 @@
 // motor one
 
 #include <Wire.h>
+#include "crhUS.h"
+
 #define uchar unsigned char
 uchar t;
 //void send_data(short a1,short b1,short c1,short d1,short e1,short f1);
@@ -15,10 +17,10 @@ int enB = 4;
 int in3 = 12;
 int in4 = 11;
 
-const int trigPin = 7;
-const int echoPin = 6;
 
 const int boundary = 60;
+
+crhUS ultrasonic(7,6);
 
 void setup()
 {
@@ -32,14 +34,14 @@ void setup()
   pinMode(in2, OUTPUT);
   pinMode(in3, OUTPUT);
   pinMode(in4, OUTPUT);
-  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
   Serial.begin(9600); // Starts the serial communication
+
+  
 }
 
 void getdata(){
   Wire.requestFrom(9, 16);    // request 16 bytes from slave device #9
-
+  
   while (Wire.available())   // slave may send less than requested
   {
     data[t] = Wire.read(); // receive a byte as character
@@ -48,7 +50,7 @@ void getdata(){
     else
       t = 0;
   }
-
+  
 }
 
 void drive(int a, int b){
@@ -71,7 +73,7 @@ void drive(int a, int b){
 
   analogWrite(enA, abs(b));
   analogWrite(enB, abs(a));
-
+  
 }
 
 void follow(int duration){
@@ -110,26 +112,10 @@ void loop()
   }
   Serial.println();
 
-  // Clears the trigPin
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-
-  // Sets the trigPin on HIGH state for 10 micro seconds
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  // Reads the echoPin, returns the sound wave travel time in microseconds
-  duration = pulseIn(echoPin, HIGH);
-
-  // Calculating the distance
-  //distance= duration*0.034/2;
-
-  // Prints the distance on the Serial Monitor
-  //Serial.print("Duration: ");
+  duration = ultrasonic.ping();
   Serial.println(duration);
 
   follow(duration);
 
-
+  
 }
